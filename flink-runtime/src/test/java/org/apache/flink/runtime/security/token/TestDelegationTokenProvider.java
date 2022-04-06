@@ -16,23 +16,32 @@
  * limitations under the License.
  */
 
-package org.apache.flink.connectors.hive;
+package org.apache.flink.runtime.security.token;
 
-import com.klarna.hiverunner.builder.HiveShellBuilder;
-import com.klarna.hiverunner.config.HiveRunnerConfig;
+import org.apache.flink.configuration.Configuration;
 
-import java.lang.reflect.Method;
+import org.apache.hadoop.security.Credentials;
 
-/** Shim for hive runner 3.x. */
-public class HiveRunnerShimV3 implements HiveRunnerShim {
+import java.util.Optional;
+
+/** An example implementation of {@link DelegationTokenProvider} which does nothing. */
+public class TestDelegationTokenProvider implements DelegationTokenProvider {
 
     @Override
-    public void setCommandShellEmulation(HiveShellBuilder builder, HiveRunnerConfig config)
-            throws Exception {
-        Method method = HiveRunnerConfig.class.getDeclaredMethod("getCommandShellEmulation");
-        Object emulation = method.invoke(config);
-        Class emulationClz = Class.forName("com.klarna.hiverunner.CommandShellEmulation");
-        method = HiveShellBuilder.class.getDeclaredMethod("setCommandShellEmulation", emulationClz);
-        method.invoke(builder, emulation);
+    public String serviceName() {
+        return "test";
+    }
+
+    @Override
+    public void init(Configuration configuration) {}
+
+    @Override
+    public boolean delegationTokensRequired() {
+        return false;
+    }
+
+    @Override
+    public Optional<Long> obtainDelegationTokens(Credentials credentials) {
+        return Optional.empty();
     }
 }
